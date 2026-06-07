@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper Functions
+    function incoming() { return request.resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    // Schema Validation: Complaint
+    // Version 1 explicitly requested NO login or signup.
+    function isValidComplaint(data) {
+      return data.keys().hasAll(['fullName', 'mobileNumber', 'wardNumber', 'category', 'description', 'status', 'createdAt', 'updatedAt']) 
+        && data.fullName is string && data.fullName.size() <= 100
+        && data.mobileNumber is string && data.mobileNumber.size() <= 15
+        && data.wardNumber is string && data.wardNumber.size() <= 10
+        && data.category is string && data.category.size() <= 50
+        && data.description is string && data.description.size() <= 2000
+        && data.status in ['PENDING', 'IN_PROGRESS', 'RESOLVED']
+        && ( !('photoUrl' in data) || (data.photoUrl is string && data.photoUrl.size() <= 1000) )
+        && ( !('location' in data) || (data.location is string && data.location.size() <= 250) )
+        && data.createdAt == request.time;
+    }
+
+    match /{document=**} {
+      allow read, write: if false; // Global deny
+    }
+
+    match /complaints/{complaintId} {
+      // Allow unrestricted list and get since the app is fully public for Version 1
+      allow list, get: if true;
+      allow create: if isValidId(complaintId) && isValidComplaint(incoming());
+      
+      // Updates allowed to status currently.
+      allow update: if 
+        incoming().diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && incoming().status in ['PENDING', 'IN_PROGRESS', 'RESOLVED']
+        && incoming().updatedAt == request.time;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Melvisharam TVK Portal",
+  "description": "Issue reporting portal for Melvisharam TVK",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

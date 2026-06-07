@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "Complaint": {
+      "title": "Complaint",
+      "description": "A public issue reported by a citizen.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "mobileNumber": { "type": "string" },
+        "wardNumber": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "location": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "IN_PROGRESS", "RESOLVED"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "mobileNumber", "wardNumber", "category", "description", "status"]
+    }
+  },
+  "firestore": {
+    "complaints": {
+      "schema": { "$ref": "#/entities/Complaint" },
+      "description": "List of all public issues and complaints."
+    }
+  }
+}
